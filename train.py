@@ -117,7 +117,7 @@ def build(args):
     perf = DiceScore()
 
     # load model
-    model = UNet()
+    model = UNet(n_channels=3, n_classes=1)
 
     # Multi gpu option
     if args.mgpu == "true":
