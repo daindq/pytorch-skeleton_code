@@ -3,15 +3,15 @@ import os
 import argparse
 import time
 import numpy as np
-import glob
+import logging
 import json
 import torch
 import torch.nn as nn
 
-from model.dataloader import get_isic17_dataloader
+from model.dataloader import get_isic17_dataloader, get_bowl18_dataloader
 from model.net import UNet
-from utils import custom_metrics
-from utils import custom_loss
+from utils.custom_metrics import DiceScore
+from utils.custom_loss import SoftDiceLoss
 
 
 def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss, BCE_loss):
@@ -49,7 +49,8 @@ def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss, BCE_lo
                     time.time() - t,
                 )
             )
-
+        l = np.mean(loss_accumulator)
+        logging.info(f'Train epoch {epoch}, loss: {l}')
     return np.mean(loss_accumulator)
 
 
@@ -85,7 +86,8 @@ def test(model, device, test_loader, epoch, perf_measure):
                     time.time() - t,
                 )
             )
-
+        p = np.mean(perf_accumulator)
+        logging.info(f'Test epoch {epoch}, performance: {p}')
     return np.mean(perf_accumulator), np.std(perf_accumulator)
 
 
@@ -94,35 +96,48 @@ def build(args):
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
-
+    # load hyperparameters
     with(open(args.model_dir)) as f:
         hyperparams = json.load(f)
     batch_size = hyperparams["batch size"]
     n_epoch = hyperparams["num epochs"]
-    train_dataloader, _, val_dataloader = get_isic17_dataloader(args.data_root, batch_size)
+    lr = hyperparams["learning rate"]
+    lrs = hyperparams["learning rate scheduler"]
+    lrs_min = hyperparams["learning rate scheduler minimum"]
+    
+    # Load dataloaders...
+    if args.dataset == "Bowl18":
+        train_dataloader, _, val_dataloader = get_bowl18_dataloader(args.data_root, batch_size)
+    elif args.dataset == "ISIC17":
+        train_dataloader, _, val_dataloader = get_isic17_dataloader(args.data_root, batch_size)
+        
+    # get loss function
+    Dice_loss = SoftDiceLoss()
+    # get Performance metrics
+    perf = DiceScore()
 
-    Dice_loss = losses.SoftDiceLoss()
-    BCE_loss = nn.BCELoss()
-
-    perf = performance_metrics.DiceScore()
-
+    # load model
     model = UNet()
 
+    # Multi gpu option
     if args.mgpu == "true":
         model = nn.DataParallel(model)
     model.to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=hyperparams["learning rate"])
+    
+    # optimizer
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
     return (
         device,
         train_dataloader,
         val_dataloader,
         Dice_loss,
-        BCE_loss,
         perf,
         model,
         optimizer,
-        n_epoch
+        n_epoch, 
+        lrs, 
+        lrs_min
     )
 
 
@@ -132,29 +147,31 @@ def train(args):
         train_dataloader,
         val_dataloader,
         Dice_loss,
-        BCE_loss,
         perf,
         model,
         optimizer,
+        n_epoch, 
+        lrs, 
+        lrs_min
     ) = build(args)
 
     if not os.path.exists("./Trained models"):
         os.makedirs("./Trained models")
 
     prev_best_test = None
-    if args.lrs == "true":
-        if args.lrs_min > 0:
+    if lrs == "true":
+        if lrs_min > 0:
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-                optimizer, mode="max", factor=0.5, min_lr=args.lrs_min, verbose=True
+                optimizer, mode="max", factor=0.5, min_lr=lrs_min, verbose=True
             )
         else:
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer, mode="max", factor=0.5, verbose=True
             )
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(1, n_epoch + 1):
         try:
             loss = train_epoch(
-                model, device, train_dataloader, optimizer, epoch, Dice_loss, BCE_loss
+                model, device, train_dataloader, optimizer, epoch, Dice_loss
             )
             test_measure_mean, test_measure_std = test(
                 model, device, val_dataloader, epoch, perf
@@ -184,7 +201,8 @@ def train(args):
 
 def get_args():
     parser = argparse.ArgumentParser(description="Train the model.")
-    parser.add_argument("--model_dir", type=str, required=True)
+    parser.add_argument("-d", "--model_dir", type=str, required=True)
+    parser.add_argument("--dataset", type=str, required=True, choices=["Bowl18", "ISIC17"])
     parser.add_argument("--data_root", type=str, default='data/processed')
     parser.add_argument(
         "--multi-gpu", type=str, default="false", dest="mgpu", choices=["true", "false"]
@@ -195,12 +213,14 @@ def get_args():
 
 def main():
     args = get_args()
+    logging.basicConfig(filename=f'{args.model_dir}/train.log', 
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
     train(args)
 
 
 if __name__ == "__main__":
-    # main()
-    with(open('experiments/base_model/param.json')) as f:
-        hyperparams = json.load(f)
-    print(hyperparams["batch size"])
+    main()
     

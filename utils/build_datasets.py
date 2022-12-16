@@ -26,6 +26,7 @@ def build_bowl_2018(download, target):
                 , f'{target}/dev')
     shutil.copytree(f'{download}/data-science-bowl-2018/stage1_valid'
                 , f'{target}/test') # Test sets is the same as dev test.
+
     
 def build_isic_2017(download, target):
     od.download('https://www.kaggle.com/datasets/mnowak061/isic2017-256x256-jpeg', data_dir=download)
@@ -61,6 +62,7 @@ def get_args():
     parser.add_argument("--downfolder", type=str
                         , default="./data/raw", help='download folder')
     return parser.parse_args()
+
 
 # nguyendqdai - f56dd07d7a52ae4dab0008b690945b87
 if __name__ == "__main__":
