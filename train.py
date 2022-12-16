@@ -97,7 +97,7 @@ def build(args):
     else:
         device = torch.device("cpu")
     # load hyperparameters
-    with(open(args.model_dir)) as f:
+    with(open(f'{args.model_dir}/param.json')) as f:
         hyperparams = json.load(f)
     batch_size = hyperparams["batch size"]
     n_epoch = hyperparams["num epochs"]
