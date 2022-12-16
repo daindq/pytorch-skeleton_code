@@ -114,12 +114,14 @@ def get_bowl18_dataloader(path:str, batch_size: int):
     transform_4train = transforms.Compose(
         [
             transforms.ToTensor(),
+            transforms.Resize((256,256))
         ]
     )
 
     transform_4test = transforms.Compose(
         [
             transforms.ToTensor(),
+            transforms.Resize((256,256))
         ]
     )
 
