@@ -14,7 +14,7 @@ from utils.custom_metrics import DiceScore
 from utils.custom_loss import SoftDiceLoss
 
 
-def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss, BCE_loss):
+def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss):
     t = time.time()
     model.train()
     loss_accumulator = []
