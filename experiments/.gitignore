@@ -2,3 +2,5 @@
 *
 # Except this file
 !.gitignore
+!base_model/
+!base_model/param.json

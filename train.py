@@ -22,7 +22,7 @@ def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss, BCE_lo
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = Dice_loss(output, target) + BCE_loss(torch.sigmoid(output), target)
+        loss = Dice_loss(output, target)
         loss.backward()
         optimizer.step()
         loss_accumulator.append(loss.item())
@@ -49,8 +49,8 @@ def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss, BCE_lo
                     time.time() - t,
                 )
             )
-        l = np.mean(loss_accumulator)
-        logging.info(f'Train epoch {epoch}, loss: {l}')
+    l = np.mean(loss_accumulator)
+    logging.info(f'Train epoch {epoch}, loss: {l}')
     return np.mean(loss_accumulator)
 
 
@@ -86,8 +86,8 @@ def test(model, device, test_loader, epoch, perf_measure):
                     time.time() - t,
                 )
             )
-        p = np.mean(perf_accumulator)
-        logging.info(f'Test epoch {epoch}, performance: {p}')
+    p = np.mean(perf_accumulator)
+    logging.info(f'Test epoch {epoch}, performance: {p}')
     return np.mean(perf_accumulator), np.std(perf_accumulator)
 
 
@@ -155,8 +155,8 @@ def train(args):
         lrs_min
     ) = build(args)
 
-    if not os.path.exists("./Trained models"):
-        os.makedirs("./Trained models")
+    if not os.path.exists(args.model_dir):
+        os.makedirs(args.model_dir)
 
     prev_best_test = None
     if lrs == "true":
@@ -194,7 +194,7 @@ def train(args):
                     "test_measure_mean": test_measure_mean,
                     "test_measure_std": test_measure_std,
                 },
-                "Trained models/FCBFormer_" + args.dataset + ".pt",
+                args.model_dir + args.dataset + "best_performance.pt",
             )
             prev_best_test = test_measure_mean
 

@@ -1,0 +1,7 @@
+{
+    "learning rate": 1e-4,
+    "batch size": 64,
+    "num epochs": 300,
+    "learning rate scheduler": true,
+    "learning rate scheduler minimum":1e-6
+}
