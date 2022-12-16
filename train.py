@@ -117,7 +117,11 @@ def build(args):
     perf = DiceScore()
 
     # load model
-    model = UNet(n_channels=3, n_classes=1)
+    if args.dataset == "Bowl18":
+        model = UNet(n_channels=4, n_classes=1)
+    elif args.dataset == "ISIC17":
+        model = UNet(n_channels=3, n_classes=1)
+    
 
     # Multi gpu option
     if args.mgpu == "true":
