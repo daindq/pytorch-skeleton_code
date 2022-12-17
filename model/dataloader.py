@@ -89,7 +89,7 @@ def get_isic17_dataloader(path:str, batch_size: int):
         dataset=train_dataset,
         batch_size=batch_size,
         shuffle=True,
-        drop_last=False,
+        drop_last=True,
         **kwargs,
     )
 
