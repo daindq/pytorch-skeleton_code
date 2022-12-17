@@ -183,7 +183,7 @@ def train(args):
         except KeyboardInterrupt:
             print("Training interrupted by user")
             sys.exit(0)
-        if args.lrs == "true":
+        if lrs == "true":
             scheduler.step(test_measure_mean)
         if prev_best_test == None or test_measure_mean > prev_best_test:
             print("Saving...")
