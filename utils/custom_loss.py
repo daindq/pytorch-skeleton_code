@@ -21,4 +21,6 @@ class SoftDiceLoss(nn.Module):
             / (m1.sum(1) + m2.sum(1) + self.smooth)
         )
         score = 1 - score.sum() / num
-        return 
+        return score
+    
+    
