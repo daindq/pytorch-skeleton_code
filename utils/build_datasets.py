@@ -18,7 +18,7 @@ def build_bowl_2018(download, target):
     if not(os.path.exists(f'{download}/data-science-bowl-2018/stage1_valid')):
         os.mkdir(f'{download}/data-science-bowl-2018/stage1_valid')         
     for item in random.sample(items, k=70):
-        shutil.copytree(f'{download}/data-science-bowl-2018/stage1_train/{item}'
+        shutil.move(f'{download}/data-science-bowl-2018/stage1_train/{item}'
                         , f'{download}/data-science-bowl-2018/stage1_valid/{item}')    
     shutil.copytree(f'{download}/data-science-bowl-2018/stage1_train'
                     , f'{target}/train')

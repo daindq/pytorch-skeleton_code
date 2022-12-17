@@ -198,7 +198,7 @@ def train(args):
                     "test_measure_mean": test_measure_mean,
                     "test_measure_std": test_measure_std,
                 },
-                args.model_dir +  '/' + args.dataset + "best_performance.pt",
+                args.model_dir +  '/' + args.dataset +"_UNet_best_performance.pt",
             )
             prev_best_test = test_measure_mean
 
