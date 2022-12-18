@@ -118,9 +118,35 @@ def build(args):
 
     # load model
     if args.dataset == "Bowl18":
-        model = UNet(n_channels=4, n_classes=1)
+        # model = UNet(n_channels=4, n_classes=1)
+        model = SegFormer(in_channels=3,
+                    in_channels=4,
+                    widths=[64, 128, 256, 512],
+                    depths=[3, 4, 6, 3],
+                    all_num_heads=[1, 2, 4, 8],
+                    patch_sizes=[7, 3, 3, 3],
+                    overlap_sizes=[4, 2, 2, 2],
+                    reduction_ratios=[8, 4, 2, 1],
+                    mlp_expansions=[4, 4, 4, 4],
+                    decoder_channels=256,
+                    scale_factors=[8, 4, 2, 1],
+                    num_classes=1,
+                      drop_prob=0.1)
     elif args.dataset == "ISIC17":
-        model = UNet(n_channels=3, n_classes=1)
+        # model = UNet(n_channels=3, n_classes=1)
+        model = SegFormer(in_channels=3,
+                    in_channels=3,
+                    widths=[64, 128, 256, 512],
+                    depths=[3, 4, 6, 3],
+                    all_num_heads=[1, 2, 4, 8],
+                    patch_sizes=[7, 3, 3, 3],
+                    overlap_sizes=[4, 2, 2, 2],
+                    reduction_ratios=[8, 4, 2, 1],
+                    mlp_expansions=[4, 4, 4, 4],
+                    decoder_channels=256,
+                    scale_factors=[8, 4, 2, 1],
+                    num_classes=1,
+                      drop_prob=0.1)
     
 
     # Multi gpu option
