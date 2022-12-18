@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 
 from model.dataloader import get_isic17_dataloader, get_bowl18_dataloader
-from model.net import UNet
+from model.net import UNet, SegFormer
 from utils.custom_metrics import DiceScore
 from utils.custom_loss import SoftDiceLoss
 
@@ -40,9 +40,9 @@ def train_epoch(model, device, train_loader, optimizer, epoch, Dice_loss):
             )
         else:
             print(
-                "\rTrain Epoch: {} [{}/{} ({:.1f}%)]\tAverage loss: {:.6f}\tTime: {:.6f}".format(
+                "\rTrain Epoch: {} [last batch:{}/Total:{} ({:.1f}%)]\tAverage loss: {:.6f}\tTime: {:.6f}".format(
                     epoch,
-                    (batch_idx + 1) * len(data),
+                    len(data),
                     len(train_loader.dataset),
                     100.0 * (batch_idx + 1) / len(train_loader),
                     np.mean(loss_accumulator),
