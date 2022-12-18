@@ -396,7 +396,6 @@ if __name__ == "__main__":
     from torchsummary import summary
     x = torch.rand(64, 3, 256, 256)
     model = SegFormer(in_channels=3,
-                    in_channels=3,
                     widths=[64, 128, 256, 512],
                     depths=[3, 4, 6, 3],
                     all_num_heads=[1, 2, 4, 8],
